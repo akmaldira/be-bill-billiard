@@ -1,0 +1,6 @@
+._*
+dist
+logs
+node_modules
+.env
+ormconfig.js
