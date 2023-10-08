@@ -13,7 +13,7 @@ export const createTableBodySpec = object({
 export const createOrderBodySpec = object({
   costumer_name: string("Costumer name harus string"),
   table_order: optional(createTableBodySpec),
-  order_items: array(createFnbBodySpec),
+  order_items: array(createFnbBodySpec, "Order item harus array"),
 });
 
 export const getOrderByIdParamsSpec = object({
