@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Column,
   Entity,
   OneToMany,
@@ -7,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   Relation,
 } from "typeorm";
+import { BaseEntity } from "./base.entity";
 import { TableOrder } from "./tableOrder.entity";
 
 @Entity({ schema: "public", name: "table" })
