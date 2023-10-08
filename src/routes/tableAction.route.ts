@@ -21,6 +21,11 @@ class TableActionRoute implements IRoutes {
       hasRole([UserRole.admin, UserRole.cashier]) as any,
       tryCatch(this.controller.stop),
     );
+    this.router.put(
+      `${this.path}/add-duration/:id`,
+      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      tryCatch(this.controller.addDuration),
+    );
   }
 }
 

@@ -12,7 +12,11 @@ import OrderRepository from "@/repositories/order.repository";
 import OrderFnbRepository from "@/repositories/orderFnb.repository";
 import TableRepository from "@/repositories/table.repository";
 import TableOrderRepository from "@/repositories/tableOrder.repository";
-import { createOrderBodySpec } from "@/validations/order.validation";
+import {
+  createOrderBodySpec,
+  getOrderByIdParamsSpec,
+  paidOrderBodySpec,
+} from "@/validations/order.validation";
 import { Response } from "express";
 import { In } from "typeorm";
 import { v4 } from "uuid";
@@ -73,11 +77,15 @@ class OrderController {
       if (table.order)
         throw new HttpException(400, "Table sedang digunakan", "TABLE_USED");
 
-      totalPrice += table_order.duration * table.price;
+      if (table_order.duration > 0) {
+        totalPrice += table_order.duration * table.price;
+      }
 
       tableOrder = this.tableOrderRepository.create({
         duration: table_order.duration,
         table: { id: table_order.table_id },
+        used_table: { id: table_order.table_id },
+        life_time: table_order.duration <= 0,
       });
     }
 
@@ -107,6 +115,7 @@ class OrderController {
         this.orderItemRepository.create({
           order_id: orderId,
           fnb_id: orderItem.fnb_id,
+          fnb,
           quantity: orderItem.quantity,
         }),
       );
@@ -136,6 +145,32 @@ class OrderController {
     });
   };
 
+  public paid = async (req: RequestWithUser, res: Response) => {
+    const { id } = parse(getOrderByIdParamsSpec, req.params);
+    const { note } = parse(paidOrderBodySpec, req.body);
+
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: ["order_items", "table_order", "table_order.table", "order_items.fnb"],
+    });
+
+    if (!order) throw new HttpException(404, "Order tidak ditemukan", "ORDER_NOT_FOUND");
+
+    if (order.paid) throw new HttpException(400, "Order sudah dibayar", "ORDER_PAID");
+
+    order.paid = true;
+    order.note = note;
+
+    await AppDataSource.transaction(async transactionalEntityManager => {
+      await transactionalEntityManager.save(Order, order);
+    });
+
+    res.status(200).json({
+      error: false,
+      data: "OK",
+    });
+  };
+
   public getAll = async (req: RequestWithUser, res: Response) => {
     const orders = await this.orderRepository.find({
       relations: [
@@ -151,6 +186,29 @@ class OrderController {
     return res.status(200).json({
       error: false,
       data: orders.map(order => orderResponseSpec(order)),
+    });
+  };
+
+  public getById = async (req: RequestWithUser, res: Response) => {
+    const { id } = parse(getOrderByIdParamsSpec, req.params);
+
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations: [
+        "order_items",
+        "order_items.fnb",
+        "table_order",
+        "table_order.table",
+        "table_order.used_table",
+        "created_by",
+      ],
+    });
+
+    if (!order) throw new HttpException(404, "Order tidak ditemukan", "ORDER_NOT_FOUND");
+
+    return res.status(200).json({
+      error: false,
+      data: orderResponseSpec(order),
     });
   };
 }

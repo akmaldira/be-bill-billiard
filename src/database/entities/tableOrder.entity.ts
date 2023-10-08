@@ -1,4 +1,7 @@
 import {
+  AfterLoad,
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -25,6 +28,9 @@ export class TableOrder {
   @JoinColumn({ name: "used_table_id" })
   used_table: Relation<Table>;
 
+  @Column({ default: false })
+  life_time: boolean;
+
   @OneToOne(() => Table, table => table.order)
   @JoinColumn({ name: "table_id" })
   table?: Relation<Table>;
@@ -32,4 +38,15 @@ export class TableOrder {
   @OneToOne(() => Order, order => order.table_order)
   @JoinColumn({ name: "order_id" })
   order: Relation<Order>;
+
+  @AfterLoad()
+  afterLoad() {
+    this.duration /= 60;
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  beforeInsert() {
+    if (!this.life_time) this.duration *= 60;
+  }
 }

@@ -15,3 +15,11 @@ export const createOrderBodySpec = object({
   table_order: optional(createTableBodySpec),
   order_items: array(createFnbBodySpec),
 });
+
+export const getOrderByIdParamsSpec = object({
+  id: string("ID harus string"),
+});
+
+export const paidOrderBodySpec = object({
+  note: optional(string("Note harus string")),
+});

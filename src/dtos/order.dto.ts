@@ -7,13 +7,11 @@ export const orderResponseSpec = (orders: Order) => ({
   price: orders.price,
   note: orders.note,
   created_by: orders.created_by.name,
-  table: !orders.table_order
-    ? null
-    : orders.table_order.table
-    ? orders.table_order.table.name
-    : orders.table_order.used_table.name,
+  table: !orders.table_order ? null : orders.table_order.used_table.name,
   duration: !orders.table_order ? null : orders.table_order.duration,
+  life_time: orders.table_order?.life_time,
   order_items: orders.order_items.map(orderItem => ({
+    id: orderItem.id,
     fnb: orderItem.fnb.name,
     quantity: orderItem.quantity,
   })),

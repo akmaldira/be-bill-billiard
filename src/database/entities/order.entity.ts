@@ -1,4 +1,5 @@
 import {
+  BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
@@ -8,7 +9,9 @@ import {
   PrimaryGeneratedColumn,
   Relation,
 } from "typeorm";
+import { AppDataSource } from "../datasource";
 import { BaseEntity } from "./base.entity";
+import { Fnb } from "./fnb.entity";
 import { OrderFnb } from "./orderFnb.entity";
 import { TableOrder } from "./tableOrder.entity";
 import { User } from "./user.entity";
@@ -28,7 +31,7 @@ export class Order extends BaseEntity {
   price: number;
 
   @Column({ nullable: true })
-  note: string;
+  note?: string;
 
   // Relational
   @ManyToOne(() => User, user => user.orders)
@@ -40,4 +43,18 @@ export class Order extends BaseEntity {
 
   @OneToMany(() => OrderFnb, orderItem => orderItem.order)
   order_items: Relation<OrderFnb>[];
+
+  @BeforeUpdate()
+  async beforeUpdate() {
+    // Paid condition
+    if (this.paid) {
+      const updatedFnb = this.order_items.map(orderItem => {
+        return {
+          id: orderItem.fnb.id,
+          stock: orderItem.fnb.stock - orderItem.quantity,
+        };
+      });
+      await AppDataSource.manager.save(Fnb, updatedFnb);
+    }
+  }
 }

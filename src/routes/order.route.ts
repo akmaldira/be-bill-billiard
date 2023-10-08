@@ -26,6 +26,16 @@ class OrderRoute implements IRoutes {
       hasRole([UserRole.admin, UserRole.cashier, UserRole.chef]) as any,
       tryCatch(this.controller.getAll),
     );
+    this.router.get(
+      `${this.path}/:id`,
+      hasRole([UserRole.admin, UserRole.cashier, UserRole.chef]) as any,
+      tryCatch(this.controller.getById),
+    );
+    this.router.patch(
+      `${this.path}/:id`,
+      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      tryCatch(this.controller.paid),
+    );
   }
 }
 
