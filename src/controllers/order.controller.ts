@@ -82,7 +82,7 @@ class OrderController {
       }
 
       tableOrder = this.tableOrderRepository.create({
-        duration: table_order.duration,
+        duration: table_order.duration <= 0 ? 0 : table_order.duration,
         table: { id: table_order.id },
         used_table: { id: table_order.id },
         life_time: table_order.duration <= 0,
