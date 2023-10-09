@@ -87,6 +87,7 @@ class AuthController {
     const dataStoredInToken = {
       id: user.id,
       email: user.email,
+      name: user.name,
       role: user.role,
     };
     const secretKey: string = SECRET_KEY!;

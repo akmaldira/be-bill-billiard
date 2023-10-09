@@ -1,5 +1,6 @@
 import { AppDataSource } from "@/database/datasource";
 import { Table } from "@/database/entities/table.entity";
+import { tableResponseSpec } from "@/dtos/table.dto";
 import { HttpException } from "@/exceptions/http.exception";
 import { RequestWithUser } from "@/interfaces/route.interface";
 import TableRepository from "@/repositories/table.repository";
@@ -38,11 +39,18 @@ class TableController {
   };
 
   public getAll = async (req: RequestWithUser, res: Response) => {
-    const tables = await this.tableRepository.find();
+    const tables = await this.tableRepository.find({
+      relations: [
+        "order",
+        "order.order",
+        "order.order.order_items",
+        "order.order.order_items.fnb",
+      ],
+    });
 
     res.status(200).json({
       error: false,
-      data: tables,
+      data: tables.map(table => tableResponseSpec(table)),
     });
   };
 
