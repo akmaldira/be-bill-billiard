@@ -68,7 +68,7 @@ class OrderController {
     let tableOrder: TableOrder | null = null;
     if (table_order) {
       const table = await this.tableRepository.findOne({
-        where: { id: table_order.table_id },
+        where: { id: table_order.id },
         relations: ["order"],
       });
       if (!table)
@@ -83,8 +83,8 @@ class OrderController {
 
       tableOrder = this.tableOrderRepository.create({
         duration: table_order.duration,
-        table: { id: table_order.table_id },
-        used_table: { id: table_order.table_id },
+        table: { id: table_order.id },
+        used_table: { id: table_order.id },
         life_time: table_order.duration <= 0,
       });
     }
@@ -100,11 +100,11 @@ class OrderController {
 
     const orderItemsTemp: any[] = [];
 
-    const fnbIds = order_items.map(orderItem => orderItem.fnb_id);
+    const fnbIds = order_items.map(orderItem => orderItem.id);
     const fnbs = await this.fnbRepository.findBy({ id: In(fnbIds) });
 
     order_items.forEach(orderItem => {
-      const fnb = fnbs.find(fnb => fnb.id === orderItem.fnb_id);
+      const fnb = fnbs.find(fnb => fnb.id === orderItem.id);
       if (!fnb) {
         throw new HttpException(404, "Fnb tidak ditemukan", "FNB_NOT_FOUND");
       }
@@ -114,7 +114,7 @@ class OrderController {
       orderItemsTemp.push(
         this.orderItemRepository.create({
           order_id: orderId,
-          fnb_id: orderItem.fnb_id,
+          fnb_id: orderItem.id,
           fnb,
           quantity: orderItem.quantity,
         }),
