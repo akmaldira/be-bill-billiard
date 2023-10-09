@@ -8,6 +8,7 @@ export const tableResponseSpec = (table: Table) => ({
   order: table.order
     ? {
         created_at: table.order?.order?.created_at,
+        costumer_name: table.order?.order?.costumer_name,
         duration: table.order?.duration,
         life_time: table.order?.life_time,
         price: table.order?.order?.price,
