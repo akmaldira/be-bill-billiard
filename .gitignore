@@ -3,3 +3,5 @@ dist
 logs
 node_modules
 .env
+ormconfig.js
+yarn.lock
