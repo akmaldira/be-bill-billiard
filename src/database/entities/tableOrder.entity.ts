@@ -22,7 +22,7 @@ export class TableOrder {
   duration: number; // in minutes
 
   @Column({ nullable: true })
-  stoped_at: Date;
+  stoped_at?: Date;
 
   @ManyToOne(() => Table, table => table.table_orders)
   @JoinColumn({ name: "used_table_id" })

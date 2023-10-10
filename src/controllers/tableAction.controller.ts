@@ -16,6 +16,7 @@ import { getMinutesBetweenDates } from "@/utils/utils";
 import {
   addDurationBodySpec,
   stopTableParamsSpec,
+  stopTableReasonQuerySpec,
   updateOrderFnbBodySpec,
 } from "@/validations/tableAction.validation";
 import { Response } from "express";
@@ -58,6 +59,7 @@ class TableActionController {
 
   public stop = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(stopTableParamsSpec, req.params);
+    const { reason } = parse(stopTableReasonQuerySpec, req.query);
 
     const orderTable = await this.tableOrderRepository.findOne({
       where: { table: { id } },
@@ -73,7 +75,7 @@ class TableActionController {
 
     const stoped_at = new Date();
 
-    orderTable.stoped_at = stoped_at;
+    orderTable.stoped_at = reason == "done" ? undefined : stoped_at;
     orderTable.table = null!;
 
     if (orderTable.life_time) {

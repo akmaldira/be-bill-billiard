@@ -1,7 +1,11 @@
-import { array, coerce, number, object, optional, string } from "valibot";
+import { array, coerce, enumType, number, object, optional, string } from "valibot";
 
 export const stopTableParamsSpec = object({
   id: coerce(number("ID Harus angka"), Number),
+});
+
+export const stopTableReasonQuerySpec = object({
+  reason: enumType(["stop", "done"], "Reason harus stop atau done"),
 });
 
 export const addDurationBodySpec = object({
