@@ -41,6 +41,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@types/mqtt": "^2.5.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -52,6 +53,7 @@
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "mqtt": "^5.1.2",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.3.17",

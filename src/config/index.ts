@@ -6,6 +6,8 @@ export const LOG_FORMAT = NODE_ENV === "development" ? "dev" : "combined";
 
 config({ path: `.env${NODE_ENV == "development" ? ".development" : ""}` });
 
-export const { PORT, SECRET_KEY } = process.env;
+export const { PORT, SECRET_KEY, MQTT_PROTOCOL, MQTT_HOST } = process.env;
 
 export const PRICE_PER_MINUTES = Number(process.env.PRICE_PER_MINUTES) || 583;
+
+export const MQTT_PORT = Number(process.env.MQTT_PORT) || 1883;

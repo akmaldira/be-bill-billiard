@@ -12,6 +12,7 @@ import OrderRepository from "@/repositories/order.repository";
 import OrderFnbRepository from "@/repositories/orderFnb.repository";
 import TableRepository from "@/repositories/table.repository";
 import TableOrderRepository from "@/repositories/tableOrder.repository";
+import { connection } from "@/utils/mqtt";
 import { getMinutesBetweenDates } from "@/utils/utils";
 import {
   addDurationBodySpec,
@@ -63,7 +64,7 @@ class TableActionController {
 
     const orderTable = await this.tableOrderRepository.findOne({
       where: { table: { id } },
-      relations: ["order"],
+      relations: ["order", "table", "used_table"],
     });
 
     if (!orderTable) {
@@ -85,6 +86,10 @@ class TableActionController {
     }
 
     await AppDataSource.transaction(async transactionEntityManager => {
+      const client = await connection();
+      if (!client)
+        throw new HttpException(500, "MQTT Connection Failed", "MQTT_CONNECTION_FAILED");
+      client.publish("iot/meja", `meja${orderTable.used_table!.device_id}_off`);
       await transactionEntityManager.save(TableOrder, orderTable);
       await transactionEntityManager.save(Order, orderTable.order);
     });

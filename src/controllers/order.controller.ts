@@ -12,6 +12,7 @@ import OrderRepository from "@/repositories/order.repository";
 import OrderFnbRepository from "@/repositories/orderFnb.repository";
 import TableRepository from "@/repositories/table.repository";
 import TableOrderRepository from "@/repositories/tableOrder.repository";
+import { connection } from "@/utils/mqtt";
 import {
   createOrderBodySpec,
   getOrderByIdParamsSpec,
@@ -66,8 +67,10 @@ class OrderController {
     let totalPrice = 0;
 
     let tableOrder: TableOrder | null = null;
+    let table: Table | null = null;
+
     if (table_order) {
-      const table = await this.tableRepository.findOne({
+      table = await this.tableRepository.findOne({
         where: { id: table_order.id },
         relations: ["order"],
       });
@@ -137,6 +140,13 @@ class OrderController {
       order.price = totalPrice;
 
       await transactionalEntityManager.save(Order, order);
+
+      if (table) {
+        const client = await connection();
+        if (!client)
+          throw new HttpException(500, "MQTT Client error", "MQTT_CLIENT_ERROR");
+        client.publish("iot/meja", `meja${table.device_id}_on`);
+      }
     });
 
     return res.status(201).json({
