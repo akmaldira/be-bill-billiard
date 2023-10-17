@@ -144,22 +144,24 @@ class OrderController {
       if (table) {
         const client = await connection();
         client.publish("iot/meja", `meja${table.device_id}_on`);
+        console.log(orderItems.length);
         if (orderItems.length > 0) {
-          const orderItems = await this.orderItemRepository.find({
+          const newOrderItems = await this.orderItemRepository.find({
             where: {
               status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
               fnb: {
                 category: In(["food", "beverage"]),
               },
             },
-            relations: ["fnb"],
+            relations: ["fnb", "order"],
             order: {
               order: {
                 created_at: "ASC",
               },
             },
           });
-          client.publish("orders", JSON.stringify(orderItems));
+          console.log(newOrderItems);
+          client.publish("orders", JSON.stringify(newOrderItems));
         }
       }
     });

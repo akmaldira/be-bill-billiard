@@ -27,7 +27,7 @@ class OrderItemController {
           category: In(["food", "beverage"]),
         },
       },
-      relations: ["fnb"],
+      relations: ["fnb", "order"],
       order: {
         order: {
           created_at: "ASC",
