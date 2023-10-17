@@ -1,17 +1,17 @@
 import { Order } from "@/database/entities/order.entity";
 
-export const orderResponseSpec = (orders: Order) => ({
-  id: orders.id,
-  costumer_name: orders.costumer_name,
-  paid: orders.paid,
-  price: orders.price,
-  note: orders.note,
-  created_by: orders.created_by.name,
-  created_at: orders.created_at,
-  table: !orders.table_order ? null : orders.table_order.used_table.name,
-  duration: !orders.table_order ? null : orders.table_order.duration,
-  life_time: orders.table_order?.life_time,
-  order_items: orders.order_items.map(orderItem => ({
+export const orderResponseSpec = (order: Order) => ({
+  id: order.id,
+  costumer_name: order.costumer_name,
+  paid: order.paid,
+  price: order.price,
+  note: order.note,
+  created_by: order.created_by.name,
+  created_at: order.created_at,
+  table: !order.table_order ? null : order.table_order.used_table.name,
+  duration: !order.table_order ? null : order.table_order.duration,
+  life_time: order.table_order?.life_time,
+  order_items: order.order_items.map(orderItem => ({
     id: orderItem.id,
     fnb: orderItem.fnb.name,
     quantity: orderItem.quantity,

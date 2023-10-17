@@ -27,7 +27,12 @@ class OrderItemController {
           category: In(["food", "beverage"]),
         },
       },
-      relations: ["order", "fnb"],
+      relations: ["fnb"],
+      order: {
+        order: {
+          created_at: "ASC",
+        },
+      },
     });
     res.status(200).json({ error: false, data: orderItems });
   };

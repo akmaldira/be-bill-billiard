@@ -2,7 +2,7 @@ import { config } from "dotenv";
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
 
-export const LOG_FORMAT = NODE_ENV === "development" ? "dev" : "combined";
+export const LOG_FORMAT = NODE_ENV === "development" ? "dev" : "tiny";
 
 config({ path: `.env${NODE_ENV == "development" ? ".development" : ""}` });
 
