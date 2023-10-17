@@ -5,8 +5,8 @@ module.exports = {
   host: "localhost",
   port: 5432,
   username: "postgres",
-  password: "Akmaldira123",
-  database: "bill-billiard",
+  password: "arcadia",
+  database: "arcadia_db",
   synchronize: false,
   logging: false,
   entities: [
