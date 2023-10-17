@@ -1,4 +1,4 @@
-import { NODE_ENV } from "@/config";
+import { USE_MQTT } from "@/config";
 import { AppDataSource } from "@/database/datasource";
 import { MqttHost } from "@/database/entities/mqttHost.entity";
 import { connectAsync } from "mqtt";
@@ -18,7 +18,7 @@ export async function connection() {
     const MQTT_PORT = mqtt.port;
 
     const host = `${MQTT_PROTOCOL}://${MQTT_HOST}:${MQTT_PORT}`;
-    if (NODE_ENV == "development") {
+    if (!USE_MQTT) {
       return {
         publish: (topic: string, message: string) => {
           console.log("MQTT Client publish", topic, message);
