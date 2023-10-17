@@ -2,6 +2,7 @@ import App from "@/app";
 import "reflect-metadata";
 import AuthRoute from "./routes/auth.route";
 import FnbRoute from "./routes/fnb.route";
+import MqttHostRoute from "./routes/mqttHost.route";
 import OrderRoute from "./routes/order.route";
 import OrderItemRoute from "./routes/orderItem.route";
 import TableRoute from "./routes/table.route";
@@ -16,6 +17,7 @@ const app = new App([
   new UserRoute("/user"),
   new OrderRoute("/order"),
   new OrderItemRoute("/order-item"),
+  new MqttHostRoute("/mqtt-host"),
 ]);
 
 app.listen();

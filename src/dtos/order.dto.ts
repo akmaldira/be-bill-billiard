@@ -16,4 +16,5 @@ export const orderResponseSpec = (order: Order) => ({
     fnb: orderItem.fnb.name,
     quantity: orderItem.quantity,
   })),
+  stoped: order.table_order?.table ? false : true,
 });

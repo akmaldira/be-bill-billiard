@@ -87,8 +87,6 @@ class TableActionController {
 
     await AppDataSource.transaction(async transactionEntityManager => {
       const client = await connection();
-      if (!client)
-        throw new HttpException(500, "MQTT Connection Failed", "MQTT_CONNECTION_FAILED");
       client.publish("iot/meja", `meja${orderTable.used_table!.device_id}_off`);
       await transactionEntityManager.save(TableOrder, orderTable);
       await transactionEntityManager.save(Order, orderTable.order);

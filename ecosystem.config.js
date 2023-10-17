@@ -1,7 +1,7 @@
 /**
  * @description pm2 configuration file.
  * @example
- *  production mode :: pm2 start ecosystem.config.js --only prod
+ *  production mode :: pm2 start ecosystem.config.js --only arcadia:prod
  *  development mode :: pm2 start ecosystem.config.js --only dev
  */
 module.exports = {
@@ -25,9 +25,6 @@ module.exports = {
         NODE_ENV: "production",
         SECRET_KEY: "secret",
         PRICE_PER_MINUTES: 583,
-        MQTT_PROTOCOL: "ws",
-        MQTT_HOST: "192.168.128.0",
-        MQTT_PORT: 9001,
       },
     },
     {
@@ -50,9 +47,6 @@ module.exports = {
         NODE_ENV: "development",
         SECRET_KEY: "secret",
         PRICE_PER_MINUTES: 583,
-        MQTT_PROTOCOL: "ws",
-        MQTT_HOST: "192.168.128.0",
-        MQTT_PORT: 9001,
       },
     },
   ],

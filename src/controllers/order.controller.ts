@@ -1,7 +1,7 @@
 import { AppDataSource } from "@/database/datasource";
 import { Fnb } from "@/database/entities/fnb.entity";
 import { Order } from "@/database/entities/order.entity";
-import { OrderFnb } from "@/database/entities/orderFnb.entity";
+import { OrderFnb, OrderItemStatus } from "@/database/entities/orderFnb.entity";
 import { Table } from "@/database/entities/table.entity";
 import { TableOrder } from "@/database/entities/tableOrder.entity";
 import { orderResponseSpec } from "@/dtos/order.dto";
@@ -143,9 +143,24 @@ class OrderController {
 
       if (table) {
         const client = await connection();
-        if (!client)
-          throw new HttpException(500, "MQTT Client error", "MQTT_CLIENT_ERROR");
         client.publish("iot/meja", `meja${table.device_id}_on`);
+        if (orderItems.length > 0) {
+          const orderItems = await this.orderItemRepository.find({
+            where: {
+              status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
+              fnb: {
+                category: In(["food", "beverage"]),
+              },
+            },
+            relations: ["fnb"],
+            order: {
+              order: {
+                created_at: "ASC",
+              },
+            },
+          });
+          client.publish("orders", JSON.stringify(orderItems));
+        }
       }
     });
 
