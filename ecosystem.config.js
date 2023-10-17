@@ -25,6 +25,7 @@ module.exports = {
         NODE_ENV: "production",
         SECRET_KEY: "secret",
         PRICE_PER_MINUTES: 583,
+        USE_MQTT: true,
       },
     },
     {
@@ -47,6 +48,7 @@ module.exports = {
         NODE_ENV: "development",
         SECRET_KEY: "secret",
         PRICE_PER_MINUTES: 583,
+        USE_MQTT: false,
       },
     },
   ],
