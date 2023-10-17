@@ -7,7 +7,7 @@
 module.exports = {
   apps: [
     {
-      name: "prod", // pm2 start App name
+      name: "arcadia:prod", // pm2 start App name
       script: "dist/server.js",
       exec_mode: "cluster", // 'cluster' or 'fork'
       instance_var: "INSTANCE_ID", // instance variable
@@ -21,7 +21,7 @@ module.exports = {
       error: "./logs/error.log", // pm2 error log file
       env: {
         // environment variable
-        PORT: 3000,
+        PORT: 80,
         NODE_ENV: "production",
         SECRET_KEY: "secret",
         PRICE_PER_MINUTES: 583,

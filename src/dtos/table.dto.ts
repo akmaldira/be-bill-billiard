@@ -17,11 +17,13 @@ export const tableResponseSpec = (table: Table) => ({
           id: orderItem.id,
           quantity: orderItem.quantity,
           status: orderItem.status,
-          fnb: {
-            name: orderItem.fnb.name,
-            price: orderItem.fnb.price,
-            category: orderItem.fnb.category,
-          },
+          fnb: orderItem.fnb
+            ? {
+                name: orderItem.fnb.name,
+                price: orderItem.fnb.price,
+                category: orderItem.fnb.category,
+              }
+            : null,
         })),
       }
     : null,

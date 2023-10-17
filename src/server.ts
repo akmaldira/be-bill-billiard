@@ -9,13 +9,13 @@ import TableActionRoute from "./routes/tableAction.route";
 import UserRoute from "./routes/user.route";
 
 const app = new App([
-  new AuthRoute("/api/auth"),
-  new TableRoute("/api/table"),
-  new TableActionRoute("/api/table-action"),
-  new FnbRoute("/api/fnb"),
-  new UserRoute("/api/user"),
-  new OrderRoute("/api/order"),
-  new OrderItemRoute("/api/order-item"),
+  new AuthRoute("/auth"),
+  new TableRoute("/table"),
+  new TableActionRoute("/table-action"),
+  new FnbRoute("/fnb"),
+  new UserRoute("/user"),
+  new OrderRoute("/order"),
+  new OrderItemRoute("/order-item"),
 ]);
 
 app.listen();

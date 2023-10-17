@@ -16,6 +16,7 @@ const errorMiddleware = (
     logger.error(
       `[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`,
     );
+    logger.error(error.stack);
 
     if (error instanceof ValiError) {
       return res.status(400).json({

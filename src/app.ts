@@ -10,6 +10,7 @@ import express, { Application } from "express";
 import helmet from "helmet";
 import hpp from "hpp";
 import morgan from "morgan";
+import path from "path";
 
 class App {
   public app: Application;
@@ -25,6 +26,7 @@ class App {
     logger.info("App initializing...");
     this.connectToDatabase();
     this.initializeMiddlewares();
+    this.initializeStaticFiles();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
   }
@@ -54,12 +56,19 @@ class App {
 
   private initializeRoutes(routes: IRoutes[]): void {
     routes.forEach(route => {
-      this.app.use("/", route.router);
+      this.app.use("/api", route.router);
+    });
+    this.app.get("*", (req, res) => {
+      res.sendFile(path.join(path.resolve("public", "index.html")));
     });
   }
 
   private initializeErrorHandling(): void {
     this.app.use(errorMiddleware);
+  }
+
+  private initializeStaticFiles(): void {
+    this.app.use(express.static(path.resolve("public")));
   }
 }
 
