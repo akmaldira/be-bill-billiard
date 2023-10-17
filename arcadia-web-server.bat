@@ -32,7 +32,7 @@ GOTO TestPostgresRunning
 
 :TestMosquittoRunning
 echo %ESC%[92m [2] PostgresSQL OK %ESC%[0m
-sc query "mosquitto" | find "RUNNING">NULL
+sc query "mosquitto" | find "RUNNING">NUL
 IF %errorlevel% EQU 0 GOTO ExecTask
 GOTO MosquittoNotRunning
 
