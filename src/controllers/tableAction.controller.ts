@@ -2,7 +2,7 @@ import { PRICE_PER_MINUTES } from "@/config";
 import { AppDataSource } from "@/database/datasource";
 import { Fnb } from "@/database/entities/fnb.entity";
 import { Order } from "@/database/entities/order.entity";
-import { OrderFnb } from "@/database/entities/orderFnb.entity";
+import { OrderFnb, OrderItemStatus } from "@/database/entities/orderFnb.entity";
 import { Table } from "@/database/entities/table.entity";
 import { TableOrder } from "@/database/entities/tableOrder.entity";
 import { HttpException } from "@/exceptions/http.exception";
@@ -21,6 +21,7 @@ import {
   updateOrderFnbBodySpec,
 } from "@/validations/tableAction.validation";
 import { Response } from "express";
+import { In } from "typeorm";
 import { parse } from "valibot";
 
 class TableActionController {
@@ -169,6 +170,24 @@ class TableActionController {
 
       await transactionEntityManager.save(Order, tableOrder.order);
       await transactionEntityManager.save(OrderFnb, orderItems);
+
+      // push mqtt
+      const client = await connection();
+      const newOrderItems = await this.orderItemsRepository.find({
+        where: {
+          status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
+          fnb: {
+            category: In(["food", "beverage"]),
+          },
+        },
+        relations: ["fnb", "order"],
+        order: {
+          order: {
+            created_at: "ASC",
+          },
+        },
+      });
+      client.publish("orders", JSON.stringify(newOrderItems));
     });
 
     res.status(200).json({

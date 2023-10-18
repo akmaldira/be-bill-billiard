@@ -160,7 +160,6 @@ class OrderController {
               },
             },
           });
-          console.log(newOrderItems);
           client.publish("orders", JSON.stringify(newOrderItems));
         }
       }
