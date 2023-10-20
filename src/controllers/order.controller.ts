@@ -183,7 +183,7 @@ class OrderController {
 
     if (order.paid) throw new HttpException(400, "Order sudah dibayar", "ORDER_PAID");
 
-    if (order.table_order.table)
+    if (order.table_order?.table)
       throw new HttpException(400, "Meja masih berlangsung", "ORDER_TABLE_USED");
 
     order.paid = true;
