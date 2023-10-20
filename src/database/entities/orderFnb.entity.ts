@@ -1,5 +1,6 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -44,4 +45,7 @@ export class OrderFnb {
   @ManyToOne(() => Fnb, fnb => fnb.order_items)
   @JoinColumn({ name: "fnb_id" })
   fnb: Relation<Fnb>;
+
+  @CreateDateColumn()
+  created_at: Date;
 }

@@ -132,6 +132,7 @@ class TableActionController {
   public updateOrderFnb = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(stopTableParamsSpec, req.params);
     const { order_items } = parse(updateOrderFnbBodySpec, req.body);
+    const client = await connection();
 
     const tableOrder = await this.tableOrderRepository.findOne({
       where: { table: { id } },
@@ -143,52 +144,78 @@ class TableActionController {
 
     const fnbs = await this.fnbRepository.find();
 
-    tableOrder.order.order_items.map(orderItem => {
-      tableOrder.order.price -= orderItem.quantity * orderItem.fnb.price;
-    });
+    await AppDataSource.transaction(
+      "READ UNCOMMITTED",
+      async transactionEntityManager => {
+        if (order_items.length === 0) {
+          // delete all order items
+          tableOrder.order.order_items.map(orderItem => {
+            tableOrder.order.price -= orderItem.quantity * orderItem.fnb.price;
+          });
+          await transactionEntityManager.save(Order, tableOrder.order);
+          await transactionEntityManager.remove(OrderFnb, tableOrder.order.order_items);
+        } else {
+          // update order items
+          const updatedOrderItems = order_items.map(orderItem => {
+            if (orderItem.id) {
+              const old = tableOrder.order.order_items.find(
+                ({ id }) => id === orderItem.id,
+              );
+              if (!old)
+                throw new HttpException(
+                  404,
+                  `Order item dengan id ${orderItem.id} tidak ditemukan`,
+                  "ORDER_ITEM_NOT_FOUND",
+                );
 
-    await AppDataSource.transaction(async transactionEntityManager => {
-      // update price
-      await transactionEntityManager.remove(OrderFnb, tableOrder.order.order_items);
-      await transactionEntityManager.save(Order, tableOrder.order);
+              tableOrder.order.price -= old.quantity * old.fnb.price;
+              old.quantity = orderItem.quantity;
+              tableOrder.order.price += old.quantity * old.fnb.price;
+              return old;
+            } else {
+              const fnb = fnbs.find(fnb => fnb.id === orderItem.fnb_id);
+              if (!fnb) {
+                throw new HttpException(404, "Fnb tidak ditemukan", "FNB_NOT_FOUND");
+              }
+              tableOrder.order.price += orderItem.quantity * fnb.price;
+              return this.orderItemsRepository.create({
+                order_id: tableOrder.order.id,
+                fnb_id: orderItem.fnb_id,
+                order: tableOrder.order,
+                fnb,
+                quantity: orderItem.quantity,
+              });
+            }
+          });
 
-      // update order items
-      const orderItems = order_items.map(orderItem => {
-        const fnb = fnbs.find(fnb => fnb.id === orderItem.fnb_id);
-        if (!fnb) {
-          throw new HttpException(404, "Fnb tidak ditemukan", "FNB_NOT_FOUND");
+          const deletedOrderItems = tableOrder.order.order_items.filter(
+            orderItem => !order_items.find(({ id }) => id === orderItem.id),
+          );
+          tableOrder.order.price -= deletedOrderItems.reduce(
+            (acc, orderItem) => acc + orderItem.quantity * orderItem.fnb.price,
+            0,
+          );
+
+          await transactionEntityManager.save(Order, tableOrder.order);
+          await transactionEntityManager.save(OrderFnb, updatedOrderItems);
+          await transactionEntityManager.remove(OrderFnb, deletedOrderItems);
         }
-        tableOrder.order.price += orderItem.quantity * fnb.price;
-        return this.orderItemsRepository.create({
-          order_id: tableOrder.order.id,
-          fnb_id: orderItem.fnb_id,
-          order: tableOrder.order,
-          fnb,
-          quantity: orderItem.quantity,
-        });
-      });
-
-      await transactionEntityManager.save(Order, tableOrder.order);
-      await transactionEntityManager.save(OrderFnb, orderItems);
-
-      // push mqtt
-      const client = await connection();
-      const newOrderItems = await this.orderItemsRepository.find({
-        where: {
-          status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
-          fnb: {
-            category: In(["food", "beverage"]),
+        // push mqtt
+        const newOrderItems = await transactionEntityManager.find(OrderFnb, {
+          where: {
+            status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
+            fnb: {
+              category: In(["food", "beverage"]),
+            },
           },
-        },
-        relations: ["fnb", "order"],
-        order: {
+          relations: ["fnb", "order"],
           order: {
             created_at: "ASC",
           },
-        },
-      });
-      client.publish("orders", JSON.stringify(newOrderItems));
-    });
+        });
+        client.publish("orders", JSON.stringify(newOrderItems));
+      },
+    );
 
     res.status(200).json({
       error: false,

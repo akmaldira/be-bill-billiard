@@ -124,45 +124,47 @@ class OrderController {
       );
     });
 
-    await AppDataSource.transaction(async transactionalEntityManager => {
-      await transactionalEntityManager.save(Order, order);
-      if (tableOrder) {
-        const tableOrderSaved = await transactionalEntityManager.save(
-          TableOrder,
-          tableOrder,
-        );
-        order.table_order = tableOrderSaved;
-      }
-
-      const orderItems = await transactionalEntityManager.save(OrderFnb, orderItemsTemp);
-
-      order.order_items = orderItems;
-      order.price = totalPrice;
-
-      await transactionalEntityManager.save(Order, order);
-
-      if (table) {
-        const client = await connection();
-        client.publish("iot/meja", `meja${table.device_id}_on`);
-        if (orderItems.length > 0) {
-          const newOrderItems = await this.orderItemRepository.find({
-            where: {
-              status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
-              fnb: {
-                category: In(["food", "beverage"]),
-              },
-            },
-            relations: ["fnb", "order"],
-            order: {
-              order: {
-                created_at: "ASC",
-              },
-            },
-          });
-          client.publish("orders", JSON.stringify(newOrderItems));
+    await AppDataSource.transaction(
+      "READ UNCOMMITTED",
+      async transactionalEntityManager => {
+        await transactionalEntityManager.save(Order, order);
+        if (tableOrder) {
+          const tableOrderSaved = await transactionalEntityManager.save(
+            TableOrder,
+            tableOrder,
+          );
+          order.table_order = tableOrderSaved;
         }
-      }
-    });
+
+        const orderItems = await transactionalEntityManager.save(
+          OrderFnb,
+          orderItemsTemp,
+        );
+
+        order.order_items = orderItems;
+        order.price = totalPrice;
+
+        await transactionalEntityManager.save(Order, order);
+
+        const client = await connection();
+        if (table) {
+          client.publish("iot/meja", `meja${table.device_id}_on`);
+        }
+        const newOrderItems = await transactionalEntityManager.find(OrderFnb, {
+          where: {
+            status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
+            fnb: {
+              category: In(["food", "beverage"]),
+            },
+          },
+          relations: ["fnb", "order"],
+          order: {
+            created_at: "ASC",
+          },
+        });
+        client.publish("orders", JSON.stringify(newOrderItems));
+      },
+    );
 
     return res.status(201).json({
       error: false,
