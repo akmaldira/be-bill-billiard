@@ -47,7 +47,16 @@ class App {
     this.app.use(morgan(LOG_FORMAT, { stream }));
     this.app.use(cors());
     this.app.use(hpp());
-    this.app.use(helmet());
+    this.app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            connectSrc: ["'self'", "http://127.0.0.1:80", "ws://192.168.1.100:9001/"],
+          },
+        },
+      }),
+    );
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
