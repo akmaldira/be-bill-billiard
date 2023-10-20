@@ -49,6 +49,9 @@ class TableController {
         "order.order.order_items",
         "order.order.order_items.fnb",
       ],
+      order: {
+        id: "ASC",
+      },
     });
 
     res.status(200).json({
