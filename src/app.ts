@@ -52,7 +52,12 @@ class App {
         contentSecurityPolicy: {
           directives: {
             defaultSrc: ["'self'"],
-            connectSrc: ["'self'", "http://127.0.0.1:80", "ws://192.168.1.100:9001/"],
+            connectSrc: [
+              "'self'",
+              "http://127.0.0.1:80",
+              "ws://192.168.1.100:9001/",
+              "wss://192.168.1.100:9001/",
+            ],
           },
         },
       }),
