@@ -144,7 +144,6 @@ class OrderController {
       if (table) {
         const client = await connection();
         client.publish("iot/meja", `meja${table.device_id}_on`);
-        console.log(orderItems.length);
         if (orderItems.length > 0) {
           const newOrderItems = await this.orderItemRepository.find({
             where: {
@@ -183,6 +182,9 @@ class OrderController {
     if (!order) throw new HttpException(404, "Order tidak ditemukan", "ORDER_NOT_FOUND");
 
     if (order.paid) throw new HttpException(400, "Order sudah dibayar", "ORDER_PAID");
+
+    if (order.table_order.table)
+      throw new HttpException(400, "Meja masih berlangsung", "ORDER_TABLE_USED");
 
     order.paid = true;
     order.note = note;
