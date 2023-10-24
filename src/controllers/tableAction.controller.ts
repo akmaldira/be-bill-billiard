@@ -150,6 +150,13 @@ class TableActionController {
         if (order_items.length === 0) {
           // delete all order items
           tableOrder.order.order_items.map(orderItem => {
+            if (orderItem.status != OrderItemStatus.pending) {
+              throw new HttpException(
+                400,
+                `Order item ini sudah diproses atau sudah selesai`,
+                "ORDER_ITEM_NOT_PENDING",
+              );
+            }
             tableOrder.order.price -= orderItem.quantity * orderItem.fnb.price;
           });
           await transactionEntityManager.save(Order, tableOrder.order);
@@ -167,7 +174,13 @@ class TableActionController {
                   `Order item dengan id ${orderItem.id} tidak ditemukan`,
                   "ORDER_ITEM_NOT_FOUND",
                 );
-
+              if (old.status != OrderItemStatus.pending) {
+                throw new HttpException(
+                  400,
+                  `Order item ini sudah diproses atau sudah selesai`,
+                  "ORDER_ITEM_NOT_PENDING",
+                );
+              }
               tableOrder.order.price -= old.quantity * old.fnb.price;
               old.quantity = orderItem.quantity;
               tableOrder.order.price += old.quantity * old.fnb.price;
