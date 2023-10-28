@@ -175,11 +175,7 @@ class TableActionController {
                   "ORDER_ITEM_NOT_FOUND",
                 );
               if (old.status != OrderItemStatus.pending) {
-                throw new HttpException(
-                  400,
-                  `Order item ini sudah diproses atau sudah selesai`,
-                  "ORDER_ITEM_NOT_PENDING",
-                );
+                return old;
               }
               tableOrder.order.price -= old.quantity * old.fnb.price;
               old.quantity = orderItem.quantity;
