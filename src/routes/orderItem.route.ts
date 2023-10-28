@@ -17,17 +17,17 @@ class OrderItemRoute implements IRoutes {
   private initializeRoutes(): void {
     this.router.get(
       `${this.path}`,
-      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      hasRole([UserRole.admin, UserRole.chef]) as any,
       this.controller.getAll,
     );
     this.router.post(
       `${this.path}/:id/process`,
-      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      hasRole([UserRole.admin, UserRole.chef]) as any,
       this.controller.processOrderItem,
     );
     this.router.post(
       `${this.path}/:id/finish`,
-      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      hasRole([UserRole.admin, UserRole.chef]) as any,
       this.controller.finishOrderItem,
     );
   }
