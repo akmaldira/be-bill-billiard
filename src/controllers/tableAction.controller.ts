@@ -235,6 +235,29 @@ class TableActionController {
       data: "OK",
     });
   };
+
+  public createReminder = async (req: RequestWithUser, res: Response) => {
+    const { id } = parse(stopTableParamsSpec, req.params);
+
+    const tableOrder = await this.tableOrderRepository.findOne({
+      where: { table: { id } },
+      relations: ["order", "order.order_items", "order.order_items.fnb"],
+    });
+
+    if (!tableOrder)
+      throw new HttpException(404, "Tidak ada order di meja ini", "ORDER_NOT_FOUND");
+
+    const client = await connection();
+    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_off`);
+    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_on`);
+    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_off`);
+    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_on`);
+
+    res.status(200).json({
+      error: false,
+      data: "OK",
+    });
+  };
 }
 
 export default TableActionController;

@@ -31,6 +31,11 @@ class TableActionRoute implements IRoutes {
       hasRole([UserRole.admin, UserRole.cashier]) as any,
       tryCatch(this.controller.updateOrderFnb),
     );
+    this.router.get(
+      `${this.path}/reminder/:id`,
+      hasRole([UserRole.admin, UserRole.cashier]) as any,
+      tryCatch(this.controller.createReminder),
+    );
   }
 }
 
