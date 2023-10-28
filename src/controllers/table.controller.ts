@@ -39,10 +39,15 @@ class TableController {
   };
 
   public getAll = async (req: RequestWithUser, res: Response) => {
+    const { allData } = req.query;
+
     const tables = await this.tableRepository.find({
-      where: {
-        active: true,
-      },
+      where:
+        allData == "true"
+          ? {}
+          : {
+              active: true,
+            },
       relations: [
         "order",
         "order.order",

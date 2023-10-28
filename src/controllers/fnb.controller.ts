@@ -40,7 +40,16 @@ class FnbController {
   };
 
   public getAll = async (req: RequestWithUser, res: Response) => {
-    const fnbs = await this.fnbRepository.find();
+    const { allData } = req.query;
+
+    const fnbs = await this.fnbRepository.find({
+      where:
+        allData == "true"
+          ? {}
+          : {
+              active: true,
+            },
+    });
 
     res.status(200).json({
       error: false,
