@@ -31,6 +31,7 @@ class OrderItemController {
       relations: ["fnb", "order"],
       order: {
         created_at: "ASC",
+        fnb_id: "ASC",
       },
     });
     res.status(200).json({ error: false, data: orderItems });
