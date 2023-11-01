@@ -3,6 +3,7 @@ import { OrderFnb, OrderItemStatus } from "@/database/entities/orderFnb.entity";
 import { HttpException } from "@/exceptions/http.exception";
 import { RequestWithUser } from "@/interfaces/route.interface";
 import OrderFnbRepository from "@/repositories/orderFnb.repository";
+import { connection } from "@/utils/mqtt";
 import { processOrderItemParamsSpec } from "@/validations/orderItem.validation";
 import { Response } from "express";
 import { In } from "typeorm";
@@ -37,7 +38,7 @@ class OrderItemController {
 
   public processOrderItem = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(processOrderItemParamsSpec, req.params);
-
+    const client = await connection();
     const orderItem = await this.orderItemRepository.findOne({ where: { id } });
 
     if (!orderItem)
@@ -46,13 +47,13 @@ class OrderItemController {
     orderItem.status = OrderItemStatus.cooking;
 
     await this.orderItemRepository.save(orderItem);
-
+    client.publish("refresh", "true");
     res.status(200).json({ error: false, data: "OK" });
   };
 
   public finishOrderItem = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(processOrderItemParamsSpec, req.params);
-
+    const client = await connection();
     const orderItem = await this.orderItemRepository.findOne({ where: { id } });
 
     if (!orderItem)
@@ -61,7 +62,7 @@ class OrderItemController {
     orderItem.status = OrderItemStatus.done;
 
     await this.orderItemRepository.save(orderItem);
-
+    client.publish("refresh", "true");
     res.status(200).json({ error: false, data: "OK" });
   };
 }

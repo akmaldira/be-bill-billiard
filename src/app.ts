@@ -56,7 +56,7 @@ class App {
               "'self'",
               "http://127.0.0.1:80",
               "ws://192.168.1.100:9001/",
-              "ws://192.168.1.6:9001/",
+              "ws://192.168.128.1:9001/",
               "http://fonts.googleapis.com/",
             ],
             upgradeInsecureRequests: null,

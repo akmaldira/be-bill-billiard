@@ -21,7 +21,6 @@ import {
   updateOrderFnbBodySpec,
 } from "@/validations/tableAction.validation";
 import { Response } from "express";
-import { In } from "typeorm";
 import { parse } from "valibot";
 
 class TableActionController {
@@ -62,6 +61,7 @@ class TableActionController {
   public stop = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(stopTableParamsSpec, req.params);
     const { reason } = parse(stopTableReasonQuerySpec, req.query);
+    const client = await connection();
 
     const orderTable = await this.tableOrderRepository.findOne({
       where: { table: { id } },
@@ -87,10 +87,10 @@ class TableActionController {
     }
 
     await AppDataSource.transaction(async transactionEntityManager => {
-      const client = await connection();
       client.publish("iot/meja", `meja${orderTable.used_table!.device_id}_off`);
       await transactionEntityManager.save(TableOrder, orderTable);
       await transactionEntityManager.save(Order, orderTable.order);
+      client.publish("refresh", "true");
     });
 
     res.status(200).json({
@@ -102,6 +102,7 @@ class TableActionController {
   public addDuration = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(stopTableParamsSpec, req.params);
     const { duration } = parse(addDurationBodySpec, req.body);
+    const client = await connection();
 
     const tableOrder = await this.tableOrderRepository.findOne({
       where: { table: { id } },
@@ -121,6 +122,7 @@ class TableActionController {
     await AppDataSource.transaction(async transactionEntityManager => {
       await transactionEntityManager.save(TableOrder, tableOrder);
       await transactionEntityManager.save(Order, tableOrder.order);
+      client.publish("refresh", "true");
     });
 
     res.status(200).json({
@@ -210,19 +212,7 @@ class TableActionController {
           await transactionEntityManager.remove(OrderFnb, deletedOrderItems);
         }
         // push mqtt
-        const newOrderItems = await transactionEntityManager.find(OrderFnb, {
-          where: {
-            status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
-            fnb: {
-              category: In(["food", "beverage"]),
-            },
-          },
-          relations: ["fnb", "order"],
-          order: {
-            created_at: "ASC",
-          },
-        });
-        client.publish("orders", JSON.stringify(newOrderItems));
+        client.publish("refresh", "true");
       },
     );
 

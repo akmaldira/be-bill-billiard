@@ -1,7 +1,7 @@
 import { AppDataSource } from "@/database/datasource";
 import { Fnb } from "@/database/entities/fnb.entity";
 import { Order } from "@/database/entities/order.entity";
-import { OrderFnb, OrderItemStatus } from "@/database/entities/orderFnb.entity";
+import { OrderFnb } from "@/database/entities/orderFnb.entity";
 import { Table } from "@/database/entities/table.entity";
 import { TableOrder } from "@/database/entities/tableOrder.entity";
 import { orderResponseSpec } from "@/dtos/order.dto";
@@ -63,6 +63,7 @@ class OrderController {
       createOrderBodySpec,
       req.body,
     );
+    const client = await connection();
 
     let totalPrice = 0;
 
@@ -146,23 +147,10 @@ class OrderController {
 
         await transactionalEntityManager.save(Order, order);
 
-        const client = await connection();
         if (table) {
           client.publish("iot/meja", `meja${table.device_id}_on`);
         }
-        const newOrderItems = await transactionalEntityManager.find(OrderFnb, {
-          where: {
-            status: In([OrderItemStatus.pending, OrderItemStatus.cooking]),
-            fnb: {
-              category: In(["food", "beverage"]),
-            },
-          },
-          relations: ["fnb", "order"],
-          order: {
-            created_at: "ASC",
-          },
-        });
-        client.publish("orders", JSON.stringify(newOrderItems));
+        client.publish("refresh", "true");
       },
     );
 
