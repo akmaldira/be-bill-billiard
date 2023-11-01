@@ -227,17 +227,33 @@ class TableActionController {
 
     const tableOrder = await this.tableOrderRepository.findOne({
       where: { table: { id } },
-      relations: ["order", "order.order_items", "order.order_items.fnb"],
+      relations: [
+        "order",
+        "order.order_items",
+        "order.order_items.fnb",
+        "order.table_order.used_table",
+      ],
     });
-
     if (!tableOrder)
       throw new HttpException(404, "Tidak ada order di meja ini", "ORDER_NOT_FOUND");
 
     const client = await connection();
-    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_off`);
-    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_on`);
-    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_off`);
-    client.publish("iot/meja", `meja${tableOrder.used_table.device_id}_on`);
+    client.publish(
+      "iot/meja",
+      `meja${tableOrder.order.table_order.used_table.device_id}_off`,
+    );
+    client.publish(
+      "iot/meja",
+      `meja${tableOrder.order.table_order.used_table.device_id}_on`,
+    );
+    client.publish(
+      "iot/meja",
+      `meja${tableOrder.order.table_order.used_table.device_id}_off`,
+    );
+    client.publish(
+      "iot/meja",
+      `meja${tableOrder.order.table_order.used_table.device_id}_on`,
+    );
 
     res.status(200).json({
       error: false,
