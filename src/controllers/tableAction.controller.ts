@@ -13,7 +13,7 @@ import OrderFnbRepository from "@/repositories/orderFnb.repository";
 import TableRepository from "@/repositories/table.repository";
 import TableOrderRepository from "@/repositories/tableOrder.repository";
 import { connection } from "@/utils/mqtt";
-import { getMinutesBetweenDates } from "@/utils/utils";
+import { delay, getMinutesBetweenDates } from "@/utils/utils";
 import {
   addDurationBodySpec,
   stopTableParamsSpec,
@@ -242,14 +242,17 @@ class TableActionController {
       "iot/meja",
       `meja${tableOrder.order.table_order.used_table.device_id}_off`,
     );
+    await delay(1000);
     client.publish(
       "iot/meja",
       `meja${tableOrder.order.table_order.used_table.device_id}_on`,
     );
+    await delay(1000);
     client.publish(
       "iot/meja",
       `meja${tableOrder.order.table_order.used_table.device_id}_off`,
     );
+    await delay(1000);
     client.publish(
       "iot/meja",
       `meja${tableOrder.order.table_order.used_table.device_id}_on`,
