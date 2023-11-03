@@ -23,7 +23,8 @@
     "migration:generate": "yarn build && cross-env NODE_ENV=production typeorm migration:generate -o ./migrations/migration -d ./dist/database/datasource.js",
     "migration:run": "cross-env NODE_ENV=production typeorm migration:run -d ./dist/database/datasource.js",
     "migration:revert": "cross-env NODE_ENV=production typeorm migration:revert -d ./dist/database/datasource.js",
-    "cleandb": "node cleanDb.js"
+    "cleandb": "node cleanDb.js",
+    "backupdb": "node backupDb.js"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.62",
