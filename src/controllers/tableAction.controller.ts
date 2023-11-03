@@ -247,16 +247,6 @@ class TableActionController {
       "iot/meja",
       `meja${tableOrder.order.table_order.used_table.device_id}_on`,
     );
-    await delay(1000);
-    client.publish(
-      "iot/meja",
-      `meja${tableOrder.order.table_order.used_table.device_id}_off`,
-    );
-    await delay(1000);
-    client.publish(
-      "iot/meja",
-      `meja${tableOrder.order.table_order.used_table.device_id}_on`,
-    );
 
     res.status(200).json({
       error: false,
