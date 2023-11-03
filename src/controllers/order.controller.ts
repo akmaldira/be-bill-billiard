@@ -192,9 +192,8 @@ class OrderController {
   public getAll = async (req: RequestWithUser, res: Response) => {
     const orders = await this.orderRepository.find({
       order: {
-        created_at: "DESC",
-        updated_at: "DESC",
         paid: "ASC",
+        created_at: "DESC",
       },
       relations: [
         "order_items",
