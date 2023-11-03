@@ -193,6 +193,8 @@ class OrderController {
     const orders = await this.orderRepository.find({
       order: {
         created_at: "DESC",
+        updated_at: "DESC",
+        paid: "ASC",
       },
       relations: [
         "order_items",
