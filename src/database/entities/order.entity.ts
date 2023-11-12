@@ -33,6 +33,9 @@ export class Order extends BaseEntity {
   @Column({ nullable: true })
   note?: string;
 
+  @Column({ default: false })
+  is_notified: boolean;
+
   // Relational
   @ManyToOne(() => User, user => user.orders)
   @JoinColumn({ name: "created_by_id" })

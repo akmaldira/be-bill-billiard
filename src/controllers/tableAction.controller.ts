@@ -237,6 +237,15 @@ class TableActionController {
     if (!tableOrder)
       throw new HttpException(404, "Tidak ada order di meja ini", "ORDER_NOT_FOUND");
 
+    if (tableOrder.order.is_notified) {
+      return res.status(200).json({
+        error: false,
+        data: "OK",
+      });
+    }
+
+    await this.orderRepository.update(tableOrder.order.id, { is_notified: true });
+
     const client = await connection();
     client.publish(
       "iot/meja",
