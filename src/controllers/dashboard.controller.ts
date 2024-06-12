@@ -4,6 +4,7 @@ import { User } from "@/database/entities/user.entity";
 import { RequestWithUser } from "@/interfaces/route.interface";
 import OrderRepository from "@/repositories/order.repository";
 import UserRepository from "@/repositories/user.repository";
+import { getDayName, getMonthName, getWeekName } from "@/utils/utils";
 import { addDays, endOfYear, startOfYear } from "date-fns";
 import { Response } from "express";
 import { Between, IsNull } from "typeorm";
@@ -31,13 +32,13 @@ class DashboardController {
     if (!from) {
       from = startOfYear(new Date());
     } else {
-      from = new Date(from);
+      from = addDays(new Date(from), 1);
     }
 
     if (!to) {
       to = endOfYear(new Date());
     } else {
-      to = new Date(to);
+      to = addDays(new Date(to), 1);
     }
 
     const groupOrders: any[] = [];
@@ -48,7 +49,9 @@ class DashboardController {
         month: addDays(groupOrder.month, 1),
         total_paid_order_table: parseFloat(groupOrder.total_order_table),
         total_paid_order_item: parseFloat(groupOrder.total_order_item),
-        total_paid_price: parseFloat(groupOrder.total_price),
+        total_paid_price: parseFloat(
+          groupOrder.total_order_table + groupOrder.total_order_item,
+        ),
       });
     });
 
@@ -59,13 +62,17 @@ class DashboardController {
       if (group) {
         group.total_unpaid_order_table = parseFloat(groupOrder.total_order_table);
         group.total_unpaid_order_item = parseFloat(groupOrder.total_order_item);
-        group.total_unpaid_price = parseFloat(groupOrder.total_price);
+        group.total_unpaid_price = parseFloat(
+          groupOrder.total_order_table + groupOrder.total_order_item,
+        );
       } else {
         groupOrders.push({
           month,
           total_unpaid_order_table: parseFloat(groupOrder.total_order_table),
           total_unpaid_order_item: parseFloat(groupOrder.total_order_item),
-          total_unpaid_price: parseFloat(groupOrder.total_price),
+          total_unpaid_price: parseFloat(
+            groupOrder.total_order_table + groupOrder.total_order_item,
+          ),
         });
       }
     });
@@ -100,11 +107,53 @@ class DashboardController {
     res.status(200).json({
       error: false,
       data: {
-        groupOrders,
+        groupOrders: groupOrders.sort((a, b) => a.month.getTime() - b.month.getTime()),
         paidOrders,
         unPaidOrders,
         users,
       },
+    });
+  };
+
+  public report = async (req: RequestWithUser, res: Response) => {
+    let { type } = req.query as any;
+    type = type.toLowerCase() as "daily" | "weekly" | "monthly" | undefined;
+    if (!type) {
+      type = "daily";
+    }
+
+    switch (type) {
+      case "daily":
+        type = "day";
+        break;
+      case "weekly":
+        type = "week";
+        break;
+      case "monthly":
+        type = "month";
+        break;
+      default:
+        type = "day";
+        break;
+    }
+
+    const report = await this.orderRepository.getReport(type);
+
+    const result = report.map(item => ({
+      label:
+        type == "day"
+          ? getDayName(new Date(item.label))
+          : type == "week"
+          ? getWeekName(new Date(item.label))
+          : getMonthName(new Date(item.label)),
+      total_price: Number(item.total_order_item) + Number(item.total_order_table),
+      total_order_item: item.total_order_item,
+      total_order_table: item.total_order_table,
+    }));
+
+    res.status(200).json({
+      error: false,
+      data: result,
     });
   };
 }

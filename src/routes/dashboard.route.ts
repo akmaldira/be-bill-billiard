@@ -21,6 +21,11 @@ class DashboardRoute implements IRoutes {
       hasRole([UserRole.admin]) as any,
       tryCatch(this.controller.index),
     );
+    this.router.get(
+      `${this.path}/report`,
+      hasRole([UserRole.admin]) as any,
+      tryCatch(this.controller.report),
+    );
   }
 }
 

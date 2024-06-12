@@ -78,7 +78,10 @@ class TableController {
 
   public updateById = async (req: RequestWithUser, res: Response) => {
     const { id } = parse(getTableByIdParamsSpec, req.params);
-    const { name, price, device_id, active } = parse(updateTableBodySpec, req.body);
+    const { name, price, price_each_minutes, device_id, active } = parse(
+      updateTableBodySpec,
+      req.body,
+    );
 
     const table = await this.tableRepository.findOne({ where: { id } });
 
@@ -88,6 +91,7 @@ class TableController {
 
     table.name = name;
     table.price = price;
+    if (price_each_minutes) table.price_each_minutes = price_each_minutes;
     table.device_id = device_id;
     table.active = active;
 

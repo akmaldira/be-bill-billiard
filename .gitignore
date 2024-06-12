@@ -6,3 +6,4 @@ node_modules
 ormconfig.js
 yarn.lock
 arcadia-web-server.bat
+db_dump.sql

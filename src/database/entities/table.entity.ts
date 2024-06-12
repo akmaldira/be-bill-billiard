@@ -26,6 +26,9 @@ export class Table extends BaseEntity {
   @Column({ default: true })
   active: boolean;
 
+  @Column({ default: 583 })
+  price_each_minutes: number;
+
   @OneToOne(() => TableOrder, tableOrder => tableOrder.table, { nullable: true })
   order: Relation<TableOrder>;
 

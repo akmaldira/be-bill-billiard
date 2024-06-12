@@ -1,4 +1,3 @@
-import { PRICE_PER_MINUTES } from "@/config";
 import { AppDataSource } from "@/database/datasource";
 import { Fnb } from "@/database/entities/fnb.entity";
 import { Order } from "@/database/entities/order.entity";
@@ -78,13 +77,19 @@ class TableActionController {
     const stoped_at = new Date();
 
     orderTable.stoped_at = reason == "done" ? undefined : stoped_at;
-    orderTable.table = null!;
 
     if (orderTable.life_time) {
+      if (!orderTable.table) {
+        throw new HttpException(500, "Internal Server Error", "INTERNAL_SERVER_ERROR");
+      }
       const minutes = getMinutesBetweenDates(orderTable.order.created_at, stoped_at);
       orderTable.duration = minutes;
-      orderTable.order.price += Math.floor(minutes * PRICE_PER_MINUTES);
+      orderTable.order.total_price_table = Math.floor(
+        minutes * orderTable.table.price_each_minutes,
+      );
+      orderTable.order.price += Math.floor(minutes * orderTable.table.price_each_minutes);
     }
+    orderTable.table = null!;
 
     await AppDataSource.transaction(async transactionEntityManager => {
       client.publish("iot/meja", `meja${orderTable.used_table!.device_id}_off`);

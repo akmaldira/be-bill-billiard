@@ -65,7 +65,8 @@ class OrderController {
     );
     const client = await connection();
 
-    let totalPrice = 0;
+    let tablePrice = 0;
+    let itemsPrice = 0;
 
     let tableOrder: TableOrder | null = null;
     let table: Table | null = null;
@@ -82,7 +83,7 @@ class OrderController {
         throw new HttpException(400, "Table sedang digunakan", "TABLE_USED");
 
       if (table_order.duration > 0) {
-        totalPrice += table_order.duration * table.price;
+        tablePrice = table_order.duration * table.price;
       }
 
       tableOrder = this.tableOrderRepository.create({
@@ -98,6 +99,7 @@ class OrderController {
       id: orderId,
       costumer_name,
       price: 0,
+      total_price_table: tablePrice,
       created_by: req.user,
       table_order: tableOrder ?? undefined,
     });
@@ -113,7 +115,7 @@ class OrderController {
         throw new HttpException(404, "Fnb tidak ditemukan", "FNB_NOT_FOUND");
       }
 
-      totalPrice += orderItem.quantity * fnb.price;
+      itemsPrice += orderItem.quantity * fnb.price;
 
       orderItemsTemp.push(
         this.orderItemRepository.create({
@@ -143,7 +145,9 @@ class OrderController {
         );
 
         order.order_items = orderItems;
-        order.price = totalPrice;
+        order.price = itemsPrice + tablePrice;
+        order.total_price_item = itemsPrice;
+        order.total_price_table = tablePrice;
 
         await transactionalEntityManager.save(Order, order);
 

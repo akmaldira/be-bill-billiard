@@ -6,6 +6,7 @@ export const tableResponseSpec = (table: Table) => ({
   price: table.price,
   device_id: table.device_id,
   active: table.active,
+  price_each_minutes: table.price_each_minutes,
   order: table.order
     ? {
         created_at: table.order?.order?.created_at,

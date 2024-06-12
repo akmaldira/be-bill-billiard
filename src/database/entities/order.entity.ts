@@ -30,6 +30,12 @@ export class Order extends BaseEntity {
   @Column()
   price: number;
 
+  @Column({ default: 0 })
+  total_price_table: number;
+
+  @Column({ default: 0 })
+  total_price_item: number;
+
   @Column({ nullable: true })
   note?: string;
 
